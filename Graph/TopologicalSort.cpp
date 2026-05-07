@@ -1,29 +1,40 @@
 #include <bits/stdc++.h>
 using namespace std;
-void dfs(int node, vector<vector<int>>& adj, vector<bool>& visited, stack<int>& st) {
-    visited[node] = true;
+bool dfs(int node, vector<vector<int>>& adj, vector<int>& state, stack<int>& st) {
+    state[node] = 1;
     for(int neighbor : adj[node]) {
-        if(!visited[neighbor]) dfs(neighbor, adj, visited, st);
+        if(state[neighbor] == 1) return false;
+        if(state[neighbor] == 0) 
+            if(!dfs(neighbor, adj, state, st)) return false;
     }
+    state[node] = 2;
     st.push(node);
+    return true;
 }
 int main() {
     int t; cin >> t;
     while(t--) {
         int n, m; cin >> n >> m;
         vector<vector<int>> adj(n + 1);
-        vector<bool> visited(n + 1, false);
+        vector<int> state(n + 1, 0);
         stack<int> st;
-        for(int i = 0; i < m; i++) {
+        while(m--) {
             int u, v; cin >> u >> v;
             adj[u].push_back(v);
         }
-        for(int i = 1; i <= n; i++) {
-            if(!visited[i]) dfs(i, adj, visited, st);
+        for(int i = 1; i <= n; i++)
+            sort(adj[i].begin(), adj[i].end());
+        bool hasCycle = false;
+        for(int i = 1; i <=n && !hasCycle; i++) {
+            if(state[i] == 0)
+                if(!dfs(i, adj, state, st)) hasCycle = true;
         }
-        while(!st.empty()) {
-            cout << st.top() << " ";
-            st.pop();
+        if(hasCycle) cout << -1 << "\n";
+        else {
+            while(!st.empty()) {
+                cout << st.top() << " "; st.pop();
+                cout << (st.empty() ? "\n" : " ");
+            }
         }
-    }
+    } 
 }
